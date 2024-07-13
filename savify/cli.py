@@ -171,9 +171,11 @@ def guided_cli(type, quality, format, output, group, path, m3u, artist_albums, s
 @click.option('--skip-cover-art', is_flag=True, help='Don\'t add cover art to downloaded song(s).')
 @click.option('--silent', is_flag=True, help='Hide all output to stdout, overrides verbosity level.')
 @click.option('-v', '--verbose', count=True, help='Change the log verbosity level. [-v, -vv]')
+@click.option('-ff', '--ffmpeg', default=None, help='Ffmpeg path',
+              type=click.Path(exists=True, file_okay=True, dir_okay=False))
 @click.argument('query', required=False)
 @click.pass_context
-def main(ctx, type, quality, format, output, group, path, m3u, artist_albums, verbose, silent, query, skip_cover_art):
+def main(ctx, type, quality, format, output, group, path, m3u, artist_albums, verbose, silent, query, skip_cover_art, ffmpeg):
     if not silent:
         show_banner()
         log_level = convert_log_level(verbose)
@@ -193,9 +195,9 @@ def main(ctx, type, quality, format, output, group, path, m3u, artist_albums, ve
     logger = Logger(path_holder.data_path, log_level)
     ydl_options = {ctx.args[i][2:]: ctx.args[i+1] for i in range(0, len(ctx.args), 2)}
 
-    def setup(ffmpeg='ffmpeg'):
+    def setup(ffmpeg_to_use=ffmpeg):
         return Savify(quality=quality, download_format=output_format, path_holder=path_holder, group=group,
-                      skip_cover_art=skip_cover_art, logger=logger, ffmpeg_location=ffmpeg, ydl_options=ydl_options)
+                      skip_cover_art=skip_cover_art, logger=logger, ffmpeg_location=ffmpeg_to_use, ydl_options=ydl_options)
 
     def check_guided():
         if guided:
